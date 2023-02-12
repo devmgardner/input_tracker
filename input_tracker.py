@@ -1,6 +1,6 @@
 import os, sys, openpyxl, pygetwindow
 from datetime import date
-from time import time
+from time import time, sleep
 from pynput import mouse, keyboard
 #
 def resource_path(relative_path):
@@ -71,24 +71,24 @@ def on_press(key):
     log(event)
 #
 def on_release(key):
+    global m_listener, k_listener
     if key == keyboard.Key.pause:
         event = {}
         event['device'] = 'keyboard'
         event['details'] = 'Pause/Break pressed, exiting script'
         event['window'] = pygetwindow.getActiveWindowTitle()
         log(event)
-        # Stop program
-        return False
+        sleep(3)
+        m_listener.stop()
+        k_listener.stop()
+        sys.exit()
 #
 # Collect events until released
-with mouse.Listener(
-        on_move=on_move,
-        on_click=on_click,
-        on_scroll=on_scroll) as m_listener:
-    m_listener.join()
+global m_listener
+m_listener = mouse.Listener(on_move=on_move,on_click=on_click,on_scroll=on_scroll)
+m_listener.start()
 #
 # Collect events until released
-with keyboard.Listener(
-        on_press=on_press,
-        on_release=on_release) as k_listener:
-    k_listener.join()
+global k_listener
+k_listener = keyboard.Listener(on_press=on_press,on_release=on_release)
+k_listener.start()
